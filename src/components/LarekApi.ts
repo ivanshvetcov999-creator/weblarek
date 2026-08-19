@@ -1,13 +1,12 @@
 import { IApi, IProductResponse, IOrderRequest, IOrderResult } from '../types';
 
 export class LarekApi {
-  // Сохраняем базовый клиент API и ссылку на CDN картинок внутри класса
+  // Защищенное поле для хранения базового клиента API
   protected _api: IApi;
-  protected cdn: string;
 
-  constructor(api: IApi, cdn: string) {
+  // Конструктор принимает строго один параметр, как и вызывается в main.ts
+  constructor(api: IApi) {
     this._api = api;
-    this.cdn = cdn;
   }
 
   // Метод для получения списка товаров с сервера

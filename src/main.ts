@@ -1,63 +1,63 @@
-
-import './scss/styles.scss'
+import './scss/styles.scss';
 import { Products } from './components/Models/Products';
 import { Basket } from './components/Models/Basket';
-import { Order } from './components/Models/Order';
+import { BuyerData } from './components/Models/BuyerData';
 import { apiProducts } from './utils/data';
-import { Api } from './components/base/Api'; // Базовый класс из стартера
-import { LarekApi } from './components/LarekApi'; // Наш новый класс
-import { API_URL, CDN_URL } from './utils/constants'; // Константы Яндекса
+import { Api } from './components/base/Api'; 
+import { LarekApi } from './components/LarekApi'; 
+import { API_URL, CDN_URL } from './utils/constants'; 
+import { EventEmitter } from './components/base/Events';
 
+const events = new EventEmitter();
 
-const productsModel = new Products();
-productsModel.setItems(apiProducts.items); 
+//  1.ТЕСТИРОВАНИЕ КАТАЛОГА ТОВАРОВ
+const productsModel = new Products(events);
+productsModel.products = apiProducts.items; 
 
-console.log('Массив товаров из каталога:', productsModel.getItems());
+console.log('Массив товаров из каталога:', productsModel.products); 
 
-//  Создаем экземпляр корзины
-const basketModel = new Basket();
+// 2.ТЕСТИРОВАНИЕ КОРЗИНЫ 
+const basketModel = new Basket(events);
 
-// Берем первый товар из нашего каталога (который мы уже проверили)
 const firstProduct = apiProducts.items[0];
 const secondProduct = apiProducts.items[1];
 
-// Тестируем добавление товаров в корзину
+// Добавление товаров в корзину
 basketModel.add(firstProduct);
 basketModel.add(secondProduct);
 console.log('Товары в корзине после добавления:', basketModel.getItems());
 console.log('Общая стоимость корзины:', basketModel.getTotalPrice());
 
-// Тестируем удаление первого товара по id
+// Удаление первого товара по id
 basketModel.remove(firstProduct.id);
 console.log('Товары в корзине после удаления одного элемента:', basketModel.getItems());
 console.log('Новая стоимость корзины:', basketModel.getTotalPrice());
 
+// --- 3. ТЕСТИРОВАНИЕ ДАННЫХ ПОКУПАТЕЛЯ ---
+const buyerModel = new BuyerData(events);
 
-const orderModel = new Order();
+// Проверяем валидацию пустой формы 
+console.log('Ошибки пустой формы:', buyerModel.validateBuyer());
 
-// 1. Проверяем валидацию пустой формы (должно быть false)
-console.log('Заказ валиден изначально?', orderModel.validate());
+// Заполняем поля покупателя
+buyerModel.setBuyerField('payment', 'cash');
+buyerModel.setBuyerField('address', 'ул. Ленина, д. 10');
+buyerModel.setBuyerField('email', 'test@yandex.ru');
+buyerModel.setBuyerField('phone', '+79991112233');
 
-// 2. Заполняем поля покупателя
-orderModel.setField('payment', 'cash');
-orderModel.setField('address', 'ул. Ленина, д. 10');
-orderModel.setField('email', 'test@yandex.ru');
-orderModel.setField('phone', '+79991112233');
+// Проверяем данные и валидацию после заполнения
+console.log('Данные покупателя:', buyerModel.getBuyerData());
+console.log('Ошибки после заполнения полей (должен быть пустой объект):', buyerModel.validateBuyer());
 
-// 3. Проверяем данные и валидацию после заполнения (должно быть true)
-console.log('Данные заказа:', orderModel.getOrderData());
-console.log('Заказ валиден после заполнения полей?', orderModel.validate());
-
+// 4.ТЕСТИРОВАНИЕ РАБОТЫ С СЕРВЕРОМ 
 const baseApi = new Api(API_URL);
-const larekApi = new LarekApi(baseApi, CDN_URL);
+const larekApi = new LarekApi(baseApi);
 
 larekApi.getProducts()
   .then((data) => {
-    // Сохраняем пришедшие с сервера товары в модель каталога
-    productsModel.setItems(data.items);
+    productsModel.products = data.items;
     
-    // Выводим в консоль, чтобы проверить, что данные обновились
-    console.log('Реальные товары с сервера в модели:', productsModel.getItems());
+    console.log('Реальные товары с сервера в модели:', productsModel.products);
   })
   .catch((err) => {
     console.error('Ошибка при получении товаров:', err);
