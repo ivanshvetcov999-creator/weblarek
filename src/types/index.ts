@@ -21,7 +21,7 @@ export interface IProduct {
 
 // Интерфейс для данных покупателя
 export interface IBuyer {
-  payment: TPayment;
+  payment: TPayment | null;
   email: string;
   phone: string;
   address: string;
@@ -36,8 +36,8 @@ export interface IProductResponse {
 
 // Данные, которые сервер ждет при оформлении заказа (собираем из IBuyer + список ID товаров)
 export interface IOrderRequest extends IBuyer {
-  items: string[]; // ID купленных товаров
-  total: number;   // Финальная сумма
+  items: string[]; 
+  total: number;   
 }
 
 // То, что возвращает сервер при успешной отправке заказа на /order/

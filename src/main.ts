@@ -1,64 +1,152 @@
+import './scss/styles.scss';
 
-import './scss/styles.scss'
 import { Products } from './components/Models/Products';
 import { Basket } from './components/Models/Basket';
-import { Order } from './components/Models/Order';
+import { Buyer } from './components/Models/Buyer';
 import { apiProducts } from './utils/data';
-import { Api } from './components/base/Api'; // Базовый класс из стартера
-import { LarekApi } from './components/LarekApi'; // Наш новый класс
-import { API_URL, CDN_URL } from './utils/constants'; // Константы Яндекса
-
+import { Api } from './components/base/Api';
+import { LarekApi } from './components/LarekApi';
+import { API_URL } from './utils/constants';
 
 const productsModel = new Products();
-productsModel.setItems(apiProducts.items); 
 
-console.log('Массив товаров из каталога:', productsModel.getItems());
+// Устанавливаем товары
+productsModel.setItems(apiProducts.items);
 
-//  Создаем экземпляр корзины
+console.log(
+  'Массив товаров из каталога:',
+  productsModel.getItems()
+);
+
+// Получаем товар по id
+const firstProduct = productsModel.getItems()[0];
+const secondProduct = productsModel.getItems()[1];
+
+console.log(
+  'Товар по id:',
+  productsModel.getItem(firstProduct.id)
+);
+
+// Сохраняем выбранный товар
+productsModel.setSelectedItem(firstProduct);
+
+console.log(
+  'Выбранный товар:',
+  productsModel.getSelectedItem()
+);
+
 const basketModel = new Basket();
 
-// Берем первый товар из нашего каталога (который мы уже проверили)
-const firstProduct = apiProducts.items[0];
-const secondProduct = apiProducts.items[1];
-
-// Тестируем добавление товаров в корзину
+// Добавляем товары
 basketModel.add(firstProduct);
 basketModel.add(secondProduct);
-console.log('Товары в корзине после добавления:', basketModel.getItems());
-console.log('Общая стоимость корзины:', basketModel.getTotalPrice());
 
-// Тестируем удаление первого товара по id
+console.log(
+  'Товары в корзине после добавления:',
+  basketModel.getItems()
+);
+
+console.log(
+  'Количество товаров в корзине:',
+  basketModel.getCount()
+);
+
+console.log(
+  'Общая стоимость корзины:',
+  basketModel.getTotalPrice()
+);
+
+// Проверяем наличие товара
+console.log(
+  'Есть ли первый товар в корзине:',
+  basketModel.contains(firstProduct.id)
+);
+
+// Удаляем первый товар
 basketModel.remove(firstProduct.id);
-console.log('Товары в корзине после удаления одного элемента:', basketModel.getItems());
-console.log('Новая стоимость корзины:', basketModel.getTotalPrice());
 
+console.log(
+  'Корзина после удаления первого товара:',
+  basketModel.getItems()
+);
 
-const orderModel = new Order();
+console.log(
+  'Количество товаров после удаления:',
+  basketModel.getCount()
+);
 
-// 1. Проверяем валидацию пустой формы (должно быть false)
-console.log('Заказ валиден изначально?', orderModel.validate());
+console.log(
+  'Стоимость после удаления:',
+  basketModel.getTotalPrice()
+);
 
-// 2. Заполняем поля покупателя
-orderModel.setField('payment', 'cash');
-orderModel.setField('address', 'ул. Ленина, д. 10');
-orderModel.setField('email', 'test@yandex.ru');
-orderModel.setField('phone', '+79991112233');
+// Очищаем корзину
+basketModel.clear();
 
-// 3. Проверяем данные и валидацию после заполнения (должно быть true)
-console.log('Данные заказа:', orderModel.getOrderData());
-console.log('Заказ валиден после заполнения полей?', orderModel.validate());
+console.log(
+  'Корзина после очистки:',
+  basketModel.getItems()
+);
+
+console.log(
+  'Количество товаров после очистки:',
+  basketModel.getCount()
+);
+
+const buyerModel = new Buyer();
+
+// Проверяем пустые данные
+console.log(
+  'Ошибки пустых данных покупателя:',
+  buyerModel.validate()
+);
+
+// Заполняем данные покупателя
+buyerModel.setField('payment', 'cash');
+buyerModel.setField('address', 'ул. Ленина, д. 10');
+buyerModel.setField('email', 'test@yandex.ru');
+buyerModel.setField('phone', '+79991112233');
+
+// Получаем данные покупателя
+console.log(
+  'Данные покупателя:',
+  buyerModel.getBuyerData()
+);
+
+// Проверяем валидацию после заполнения
+console.log(
+  'Ошибки после заполнения данных:',
+  buyerModel.validate()
+);
+
+buyerModel.clear();
+
+console.log(
+  'Данные покупателя после очистки:',
+  buyerModel.getBuyerData()
+);
+
+console.log(
+  'Ошибки после очистки:',
+  buyerModel.validate()
+);
 
 const baseApi = new Api(API_URL);
-const larekApi = new LarekApi(baseApi, CDN_URL);
+const larekApi = new LarekApi(baseApi);
 
 larekApi.getProducts()
   .then((data) => {
-    // Сохраняем пришедшие с сервера товары в модель каталога
+    // Сохраняем товары, полученные с сервера
     productsModel.setItems(data.items);
-    
-    // Выводим в консоль, чтобы проверить, что данные обновились.
-    console.log('Реальные товары с сервера в модели:', productsModel.getItems());
+
+    console.log(
+      'Реальные товары с сервера в модели:',
+      productsModel.getItems()
+    );
   })
   .catch((err) => {
-    console.error('Ошибка при получении товаров:', err);
+    console.error(
+      'Ошибка при получении товаров:',
+      err
+    );
   });

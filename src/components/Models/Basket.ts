@@ -20,11 +20,21 @@ export class Basket {
 
   // Посчитать общую стоимость товаров в корзине
   getTotalPrice(): number {
-    return this.items.reduce((sum, item) => sum + (item.price || 0), 0);
+    return this.items.reduce((sum, item) => sum + (item.price ?? 0), 0);
   }
 
-  // Получить все товары в корзине (нужно для проверки)
+  // Получить все товары в корзине
   getItems(): IProduct[] {
-    return this.items;
+    return [...this.items];
+  }
+
+  // Проверить, есть ли товар в корзине
+  contains(id: string): boolean {
+    return this.items.some(item => item.id === id);
+  }
+
+  // Получить количество товаров в корзине
+  getCount(): number {
+    return this.items.length;
   }
 }
